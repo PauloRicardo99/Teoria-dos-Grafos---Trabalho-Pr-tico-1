@@ -1,0 +1,33 @@
+#Representando grafo pela matriz de adjacência
+
+qtdVertices = int(input("Quantidade de vertices: "))
+
+matriz = []
+
+#Criando a matriz e atribuindo os caminhos
+def criarMatriz():
+    for i in range(qtdVertices):
+        matrizAux = []
+        for j in range(qtdVertices):
+            if i==j:
+                matrizAux.append(0)
+            else:
+                matrizAux.append(int(input(f"Existe caminho entre os vértices {j+1} e {i+1}? 1-sim, 0-não ")))
+        matriz.append(matrizAux)
+#Imprimindo a matriz
+def imprimirMatriz():
+    print()
+    for i in range(qtdVertices):
+        if (i == 0):
+            print(f"    ({i + 1})", end="")
+        else:
+            print(f" ({i + 1})", end="")
+    print()
+    for i in range(qtdVertices):
+        print(f"({i + 1})", end="  ")
+        for j in range(qtdVertices):
+            print(matriz[i][j], end="   ")
+        print()
+
+criarMatriz()
+imprimirMatriz()
