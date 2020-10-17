@@ -1,33 +1,130 @@
-#Representando grafo pela matriz de adjacência
+# Representando grafo pela matriz de adjacência
 
-qtdVertices = int(input("Quantidade de vertices: "))
-
-matriz = []
-
-#Criando a matriz e atribuindo os caminhos
+# Criando a matriz e atribuindo os caminhos
 def criarMatriz():
-    for i in range(qtdVertices):
+    global qtdVertices
+    global matriz
+    qtdVertices = int(input("\nQuantidade de vertices: "))
+    matriz = []
+
+    for linha in range(qtdVertices):
         matrizAux = []
-        for j in range(qtdVertices):
-            if i==j:
+        for coluna in range(qtdVertices):
+            if linha == coluna:
                 matrizAux.append(0)
             else:
-                matrizAux.append(int(input(f"Existe caminho entre os vértices {j+1} e {i+1}? 1-sim, 0-não ")))
+                matrizAux.append(int(input(f"Existe caminho entre os vértices {coluna + 1} e {linha + 1}? 1-sim, 0-não ")))
         matriz.append(matrizAux)
-#Imprimindo a matriz
+
+# Imprimindo a matriz
 def imprimirMatriz():
-    print()
-    for i in range(qtdVertices):
-        if (i == 0):
-            print(f"    ({i + 1})", end="")
+    print("\n================== Imprimindo grafo na forma de matriz de adjacência ==================")
+    for a in range(qtdVertices):
+        if a == 0:
+            print(f"    ({a + 1})", end="")
         else:
-            print(f" ({i + 1})", end="")
+            print(f" ({a + 1})", end="")
     print()
-    for i in range(qtdVertices):
-        print(f"({i + 1})", end="  ")
-        for j in range(qtdVertices):
-            print(matriz[i][j], end="   ")
+    for linha in range(qtdVertices):
+        print(f"({linha + 1})", end="  ")
+        for coluna in range(qtdVertices):
+            print(matriz[linha][coluna], end="   ")
         print()
 
-criarMatriz()
-imprimirMatriz()
+# Verifica as adjacentes de um determinado vértice
+def getAdjacentes():
+    print("\n===================================== Adjacências =====================================\n")
+    while True:
+        verticeParametro = int(input("Qual o vértice que utilizado como parâmetro? (-1 Sair) "))
+        if 0 <= verticeParametro <= qtdVertices:
+            adjacentes = []
+            for coluna in range(qtdVertices):
+                if matriz[verticeParametro - 1][coluna] == 1:
+                    adjacentes.append(coluna + 1)
+            print(f"\nO vértice {verticeParametro} é adjacente ao(s) vértice(s) ", end="")
+            for index in range(len(adjacentes)):
+                print(adjacentes[index], end="")
+                if index != (len(adjacentes) - 1):
+                    print(", ", end="")
+            break
+        elif verticeParametro == -1:
+            break
+        else:
+            print(f"O vértice {verticeParametro} não existe no grafo, selecione outro vértice!\n")
+
+# Verifica se o grafo é regular
+def ehRegular():
+    global regular
+    adjacenciasFinal = []
+    for linha in range(qtdVertices):
+        adjacencias = 0
+        for coluna in range(qtdVertices):
+            if matriz[linha][coluna] == 1:
+                adjacencias = adjacencias + 1
+        adjacenciasFinal.append(adjacencias)
+
+    for b in range(len(adjacenciasFinal)):
+        regular = True
+        if b != 0:
+            if adjacenciasFinal[b] != adjacenciasFinal[b - 1]:
+                regular = False
+
+    return regular
+
+# Verifica se o grafo é completo
+def ehCompleto():
+    global completo
+    completo = True
+    for linha in range(qtdVertices):
+        for coluna in range(qtdVertices):
+            if(linha != coluna):
+                if matriz[linha][coluna] == 0:
+                    completo = False
+
+    return completo
+
+# Realiza a busca em profundidade
+def buscaProfundidade():
+    print()
+
+# Menu de seleção
+def menu():
+    while True:
+        print("\n======================================== Menu =========================================")
+        opcao = int(input("\n[1] Novo grafo"
+                          "\n[2] Imprimir grafo"
+                          "\n[3] Ver adjacentes de um vértice"
+                          "\n[4] Verificar se o grafo é regular"
+                          "\n[5] Verificar se o grafo é completo"
+                          "\n[6] Verificar se o grafo é conexo"
+                          "\n[7] Sair\n"))
+
+        if opcao == 1:
+            criarMatriz()
+
+        elif opcao == 2:
+            imprimirMatriz()
+
+        elif opcao == 3:
+            getAdjacentes()
+
+        elif opcao == 4:
+            reg = ehRegular()
+
+            if reg == True: print("\n================================= O grafo é regular ===================================")
+            else: print("\n=============================== O grafo não é regular =================================")
+
+        elif opcao == 5:
+            com = ehCompleto()
+            if com == True: print("\n================================= O grafo é completo ==================================")
+            else: print("\n=============================== O grafo não é completo ================================")
+
+        elif opcao == 6:
+            print()
+
+        elif opcao == 7:
+            break
+        else:
+            print("Opção inválida!")
+
+menu()
