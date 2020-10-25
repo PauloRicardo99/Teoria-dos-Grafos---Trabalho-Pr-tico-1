@@ -1,24 +1,39 @@
 # Representando grafo pela matriz de adjacência
 
 # Criando a matriz e atribuindo os caminhos
+import math
+
 def criarMatriz():
     global qtdVertices
     global matriz
+    global matrizPeso
     qtdVertices = int(input("\nQuantidade de vertices: "))
     matriz = []
+    matrizPeso = []
 
     for linha in range(qtdVertices):
         matrizAux = []
+        matrizPesoAux = []
+
         for coluna in range(qtdVertices):
-            if linha == coluna:
-                matrizAux.append(0)
+            existeCaminho = int(input(f"\nExiste caminho de {linha + 1} para {coluna + 1}? 1-sim, 0-não "))
+            if existeCaminho == 1:
+                pesoCaminho = int(input(f"Qual o peso do caminho entre {linha + 1} e {coluna + 1}? "))
             else:
-                matrizAux.append(int(input(f"Existe caminho entre os vértices {coluna + 1} e {linha + 1}? 1-sim, 0-não ")))
+                pesoCaminho = '-'
+
+            matrizAux.append(existeCaminho)
+            matrizPesoAux.append(pesoCaminho)
+
         matriz.append(matrizAux)
+        matrizPeso.append(matrizPesoAux)
+
 
 # Imprimindo a matriz
 def imprimirMatriz():
     print("\n================== Imprimindo grafo na forma de matriz de adjacência ==================")
+    #Imprimindo grafo
+    print("Grafo")
     for a in range(qtdVertices):
         if a == 0:
             print(f"    ({a + 1})", end="")
@@ -31,11 +46,26 @@ def imprimirMatriz():
             print(matriz[linha][coluna], end="   ")
         print()
 
+    # Imprimindo pesos
+    print("\nPesos")
+    for a in range(qtdVertices):
+        if a == 0:
+            print(f"    ({a + 1})", end="")
+        else:
+            print(f" ({a + 1})", end="")
+    print()
+    for linha in range(qtdVertices):
+        print(f"({linha + 1})", end="  ")
+        for coluna in range(qtdVertices):
+            print(matrizPeso[linha][coluna], end="   ")
+        print()
+
+
 # Verifica as adjacentes de um determinado vértice
 def getAdjacentes():
     print("\n===================================== Adjacências =====================================\n")
     while True:
-        verticeParametro = int(input("Qual o vértice que utilizado como parâmetro? (-1 Sair) "))
+        verticeParametro = int(input("Qual o vértice que utilizado como parâmetro? "))
         if 0 <= verticeParametro <= qtdVertices:
             adjacentes = []
             for coluna in range(qtdVertices):
@@ -47,10 +77,9 @@ def getAdjacentes():
                 if index != (len(adjacentes) - 1):
                     print(", ", end="")
             break
-        elif verticeParametro == -1:
-            break
         else:
             print(f"O vértice {verticeParametro} não existe no grafo, selecione outro vértice!\n")
+
 
 # Verifica se o grafo é regular
 def ehRegular():
@@ -71,6 +100,7 @@ def ehRegular():
 
     return regular
 
+
 # Verifica se o grafo é completo
 def ehCompleto():
     global completo
@@ -83,48 +113,164 @@ def ehCompleto():
 
     return completo
 
+
 # Realiza a busca em profundidade
 def buscaProfundidade():
     print()
 
+
+def dijkstra(vertice, s, dist, path, verticeInicial):
+    global proximoVertice
+    index = vertice - 1
+    a = math.inf
+
+    s[index] = True
+    if vertice == verticeInicial:
+        if matriz[index][index] == 1:
+            dist[index] = matrizPeso[index][index]
+            path[index] = vertice
+        else:
+            dist[index] = 0
+
+    for i in range(qtdVertices):
+        if matriz[index][i] == 1:
+            if dist[i] > (dist[index] + matrizPeso[index][i]):
+                dist[i] = dist[index] + matrizPeso[index][i]
+                path[i] = vertice
+    s[index] = True
+
+    if False in s:
+        for i in range(qtdVertices):
+            if s[i] == False:
+                if dist[i] < a:
+                    a = dist[i]
+                    proximoVertice = i + 1
+        dijkstra(proximoVertice, s, dist, path, verticeInicial)
+
+
+def dijkstraFim(caminho, path, dist, verticeInicial, i, j, tipo, fim):
+
+    if j <= qtdVertices-1:
+        caminho.append(path[j])
+        custo = dist[i]
+        if i != verticeInicial-1:
+            if int(path[j]) == verticeInicial:
+                caminhoFinal = caminho[::-1]
+                caminhoFinal.append(i+1)
+                if tipo == 7:
+                    print(f"O menor caminho do vértice {verticeInicial} até o vértice {i+1} é {caminhoFinal} e tem custo {custo}")
+                if tipo == 8 and i == fim-1:
+                    print(f"O menor caminho do vértice {verticeInicial} até o vértice {fim} é {caminhoFinal} e tem custo {custo}")
+            else:
+                j = int(path[j])-1
+                dijkstraFim(caminho, path, dist, verticeInicial, i, j, tipo, fim)
+
+
+# Recebe um vértice e o algoritmo retorna o menor caminho deste para todos os demais vértices
+def dijkstraInicio(tipo):
+    print("\n================================ Algoritmo de Dijkstra ================================\n")
+    s = []
+    dist = []
+    path = []
+    origem = fim = 0
+
+
+    for i in range(qtdVertices):
+        s.append(False)
+        dist.append(math.inf)
+        path.append('-')
+
+
+    origem = int(input("Qual o vértice de origem? "))
+    if origem > qtdVertices:
+        print(f"\nO vértice {origem} não existe no grafo, selecione outro vértice!")
+        return
+
+    if tipo == 8:
+        fim = int(input("Qual o vertice de chegada? "))
+    if fim > qtdVertices:
+        print(f"\nO vértice {fim} não existe no grafo, selecione outro vértice!")
+        return
+
+    verticeInicial = origem
+
+    print()
+
+    dijkstra(origem, s, dist, path, verticeInicial)
+
+    for i in range(qtdVertices):
+        j = i
+        caminho = []
+        dijkstraFim(caminho, path, dist, verticeInicial, i, j, tipo, fim)
+
+
 # Menu de seleção
 def menu():
-    while True:
-        print("\n======================================== Menu =========================================")
-        opcao = int(input("\n[1] Novo grafo"
-                          "\n[2] Imprimir grafo"
-                          "\n[3] Ver adjacentes de um vértice"
-                          "\n[4] Verificar se o grafo é regular"
-                          "\n[5] Verificar se o grafo é completo"
-                          "\n[6] Verificar se o grafo é conexo"
-                          "\n[7] Sair\n"))
 
-        if opcao == 1:
-            criarMatriz()
+    print("\n======================================== Menu =========================================")
+    opcao = int(input("\n[1] Novo grafo"
+                      "\n[2] Imprimir grafo"
+                      "\n[3] Ver adjacentes de um vértice"
+                      "\n[4] Verificar se o grafo é regular"
+                      "\n[5] Verificar se o grafo é completo"
+                      "\n[6] Verificar se o grafo é conexo"
+                      "\n[7] Dijkstra 1"
+                      "\n[8] Dijkstra 2"
+                      "\n[9] Sair\n"))
 
-        elif opcao == 2:
-            imprimirMatriz()
+    if opcao == 1:
+        criarMatriz()
 
-        elif opcao == 3:
-            getAdjacentes()
+    elif opcao == 2:
+        imprimirMatriz()
 
-        elif opcao == 4:
-            reg = ehRegular()
+    elif opcao == 3:
+        getAdjacentes()
 
-            if reg == True: print("\n================================= O grafo é regular ===================================")
-            else: print("\n=============================== O grafo não é regular =================================")
+    elif opcao == 4:
+        reg = ehRegular()
 
-        elif opcao == 5:
-            com = ehCompleto()
-            if com == True: print("\n================================= O grafo é completo ==================================")
-            else: print("\n=============================== O grafo não é completo ================================")
-
-        elif opcao == 6:
-            print()
-
-        elif opcao == 7:
-            break
+        if reg:
+            print("\n================================= O grafo é regular ===================================")
         else:
-            print("Opção inválida!")
+            print("\n=============================== O grafo não é regular =================================")
 
-menu()
+    elif opcao == 5:
+        com = ehCompleto()
+        if com:
+            print("\n================================= O grafo é completo ==================================")
+        else:
+            print("\n=============================== O grafo não é completo ================================")
+
+    elif opcao == 6:
+        print()
+
+    elif opcao == 7 or opcao == 8:
+        dijkstraInicio(opcao)
+
+    elif opcao == 9:
+        return False
+
+    else:
+        print("Entrada inválida!")
+
+
+def start():
+    repetir = True
+    while repetir != False:
+        try:
+            criarMatriz()
+            repetir = False
+        except Exception as ValueError:
+            print("Entrada inválida!")
+
+
+    repetir = True
+    while repetir != False:
+        try:
+            repetir = menu()
+
+        except Exception as ValueError:
+            print("Entrada inválida!")
+
+start()
